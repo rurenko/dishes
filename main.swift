@@ -352,7 +352,7 @@ extension WeeklyMenu {
   //  5. Суббота или воскресенье — свободный день
   //  6. Любое блюдо, кроме супа, не должно повторяться 2 раза в неделю
 
-  static func make(dishes: [Dish]) -> WeeklyMenu {
+  static func make(dishes: [Dish], mondayDinner: Dish? = nil) -> WeeklyMenu {
     var menu = [Weekday: DaylyMenu]()
     let freeday = Weekday.weekend.randomElement()!
     let vegetarianday = Weekday.allCases
@@ -373,18 +373,33 @@ extension WeeklyMenu {
       let yesterdaySoup = (yesterdayWasSoup && !dayBeforeYesterdayWasSoup)
         ? yesterdayMenu?.value?.dinner : nil
 
+      let option: DinnerOption
+      if let mondayDinner = mondayDinner, today == .monday {
+        option = .mondayDinner(mondayDinner)
+      } else if let yesterdaySoup = yesterdaySoup {
+        option = .yesterday(yesterdaySoup)
+      } else {
+        option = .fromScratch
+      }
+
       let todayMenu: DaylyMenu
       if today == freeday {
         todayMenu = .free
       } else if today == vegetarianday {
-        todayMenu = availableDishes.vegetarian.makeRegularMenuForADay(yesterdaySoup)!
+        todayMenu = availableDishes.vegetarian.makeRegularMenuForADay(option)!
       } else {
-        todayMenu = availableDishes.makeRegularMenuForADay(yesterdaySoup)!
+        todayMenu = availableDishes.makeRegularMenuForADay(option)!
       }
       menu[today] = todayMenu
     }
     return WeeklyMenu(dict: menu)!
   }
+}
+
+enum DinnerOption {
+  case yesterday(Dish)
+  case mondayDinner(Dish)
+  case fromScratch
 }
 
 extension Array where Element == Dish {
@@ -393,7 +408,7 @@ extension Array where Element == Dish {
   func not(in used: Set<Dish>) -> Self { filter { !used.contains($0) } }
 
   func makeRegularMenuForADay(
-    _ yesterday: Dish? = nil
+    _ dinnerOption: DinnerOption
   ) -> DaylyMenu? {
     let onceADay: [Dish.Ingredient] = [.rice, .egg, .grecha, .salmon, .cottageCheese, .pork]
     guard let breakfast = not(in: usedDishes)
@@ -403,17 +418,22 @@ extension Array where Element == Dish {
     }
     usedDishes.insert(breakfast)
     let dinner: Dish
-    if let yesterday = yesterday {
+    switch dinnerOption {
+    case let .yesterday(yesterday):
       dinner = yesterday
-    } else if let today = not(in: usedDishes)
-                .filter({ $0.meals.contains(.dinner) })
-                .filter({ $0.ingredients.isDisjoint(with: breakfast.ingredients.intersection(onceADay)) })
-                .randomElement() {
-      dinner = today
-      usedDishes.insert(dinner)
-    } else {
-      return nil
+    case let .mondayDinner(mondayDinner):
+      dinner = mondayDinner
+    case .fromScratch:
+      if let today = not(in: usedDishes)
+                  .filter({ $0.meals.contains(.dinner) })
+                  .filter({ $0.ingredients.isDisjoint(with: breakfast.ingredients.intersection(onceADay)) })
+                  .randomElement() {
+        dinner = today
+      } else {
+        return nil
+      }
     }
+    usedDishes.insert(dinner)
     let breakfastAndDinner = breakfast.ingredients.union(dinner.ingredients)
     guard let supper = not(in: usedDishes)
             .filter({ $0.meals.contains(.supper) })
@@ -428,7 +448,8 @@ extension Array where Element == Dish {
 }
 
 var usedDishes = Set<Dish>()
-let menu = WeeklyMenu.make(dishes: favoritesDishes)
+let mondayDinner = favoritesDishes.first { $0.name == "овощной суп" }!
+let menu = WeeklyMenu.make(dishes: favoritesDishes, mondayDinner: mondayDinner)
 print(menu)
 print("Все ингридиенты:")
 menu.ingredients.forEach { print("\($0)") }
