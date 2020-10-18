@@ -17,6 +17,7 @@ struct Dish: Hashable, CustomStringConvertible {
     case nuts = "орехи"
     case flour = "мука"
     case beans = "фасоль"
+    case cannedBeans = "фасоль консервированая"
     case kefir = "кефир"
     case bacon = "бекон"
     case salmon = "лосось"
@@ -68,6 +69,7 @@ struct Dish: Hashable, CustomStringConvertible {
            .nuts,
            .flour,
            .beans,
+           .cannedBeans,
            .kefir,
            .creamcheese,
            .vinegar,
@@ -142,6 +144,7 @@ struct Dish: Hashable, CustomStringConvertible {
            .cottageCheese,
            .oatmeal,
            .beans,
+           .cannedBeans,
            .creamcheese,
            .vinegar,
            .peas,
@@ -189,7 +192,7 @@ let favoritesDishes = [
   Dish(name: "гречневая каша", meals: [.breakfast], kind: .porridge, ingredients: [.grecha, .coconutMilk]),
   Dish(name: "сырники", meals: [.breakfast], kind: .none, ingredients: [.cottageCheese, .egg, .flour]),
   Dish(name: "гранола", meals: [.breakfast], kind: .none, ingredients: [.oatmeal, .nuts]),
-  Dish(name: "английский завтрак", meals: [.breakfast], kind: .none, ingredients: [.egg, .bacon, .beans, .tomato]),
+  Dish(name: "английский завтрак", meals: [.breakfast], kind: .none, ingredients: [.egg, .bacon, .cannedBeans, .tomato]),
   Dish(name: "авокадо тост", meals: [.breakfast], kind: .none, ingredients: [.avocado, .egg, .bread, .salmon, .creamcheese]),
   Dish(name: "оладушки", meals: [.breakfast], kind: .none, ingredients: [.kefir, .flour, .vinegar]),
 
@@ -213,7 +216,7 @@ let favoritesDishes = [
   Dish(name: "запечённая клунька", meals: [.dinner], kind: .main, ingredients: [.chicken]),
 
   Dish(name: "салат с креветками", meals: [.supper], kind: .salad, ingredients: [.green, .shrimp, .tomato, .egg]),
-  Dish(name: "кустодиевский салат", meals: [.supper], kind: .salad, ingredients: [.green, .beans, .sausage, .tomato, .rusk, .mayonnaise]),
+  Dish(name: "кустодиевский салат", meals: [.supper], kind: .salad, ingredients: [.green, .cannedBeans, .sausage, .tomato, .rusk, .mayonnaise]),
   Dish(name: "пельмени", meals: [.supper], kind: .none, ingredients: [.pelmeni]),
   Dish(name: "гавайская смесь с яйцом", meals: [.supper], kind: .none, ingredients: [.havaiiMix, .egg]),
   Dish(name: "творог с зеленью", meals: [.supper], kind: .none, ingredients: [.cottageCheese, .cucumber, .dill]),
