@@ -7,7 +7,7 @@ struct SeededGenerator: RandomNumberGenerator {
     self.seed = seed
     generator = GKMersenneTwisterRandomSource(seed: seed)
   }
-  
+
   mutating func next() -> UInt64 {
     let next1 = UInt64(bitPattern: Int64(generator.nextInt()))
     let next2 = UInt64(bitPattern: Int64(generator.nextInt()))
@@ -79,7 +79,9 @@ struct Dish: Hashable, CustomStringConvertible {
     case cauliflower = "цветная капуста"
     case dijonMustard = "дижонская горчица"
     case cheese = "сыр"
-    
+    case spinach = "шпинат"
+    case sourCream = "сметана"
+
     var isVegetarian: Bool {
       switch self {
       case .spud,
@@ -133,6 +135,8 @@ struct Dish: Hashable, CustomStringConvertible {
            .cauliflower,
            .dijonMustard,
            .cheese,
+           .spinach,
+           .sourCream,
            .havaiiMix:
         return true
       case .chicken,
@@ -146,7 +150,7 @@ struct Dish: Hashable, CustomStringConvertible {
         return false
       }
     }
-    
+
     var emoji: String? {
       switch self {
       case .spud: return "🥔"
@@ -206,25 +210,27 @@ struct Dish: Hashable, CustomStringConvertible {
            .sweetRedPepper,
            .garganzola,
            .dijonMustard,
+           .spinach,
+           .sourCream,
            .havaiiMix:
         return nil
       }
     }
-    
+
     var description: String {
       rawValue + (emoji ?? "")
     }
   }
-  
+
   let name: String
   let meals: Set<Meal>
   let kind: Kind?
   let ingredients: Set<Ingredient>
-  
+
   var isVegetarian: Bool {
     ingredients.filter { !$0.isVegetarian }.isEmpty
   }
-  
+
   var description: String {
     let ingredientsList = ingredients.map { "\($0)" }.joined(separator: ", ")
     return "\(name) (\(ingredientsList))"
@@ -239,8 +245,8 @@ let favoritesDishes = [
   Dish(name: "английский завтрак", meals: [.breakfast], kind: .none, ingredients: [.egg, .bacon, .cannedBeans, .tomato]),
   Dish(name: "авокадо тост", meals: [.breakfast], kind: .none, ingredients: [.avocado, .egg, .bread, .salmon, .creamcheese]),
   Dish(name: "оладушки", meals: [.breakfast], kind: .none, ingredients: [.kefir, .flour, .vinegar]),
-  
-  //  Dish(name: "грибной суп", meals: [.dinner], kind: .soup, ingredients: [.milk, .mushrooms, .onion, .spud, .carrot]),
+
+  Dish(name: "грибной суп", meals: [.dinner], kind: .soup, ingredients: [.milk, .mushrooms, .onion, .spud, .carrot]),
   Dish(name: "гороховый суп", meals: [.dinner], kind: .soup, ingredients: [.peas, .smockedRibs, .onion, .spud, .carrot]),
   Dish(name: "рыбный суп", meals: [.dinner], kind: .soup, ingredients: [.salmon, .onion, .spud, .carrot]),
   Dish(name: "куриный суп", meals: [.dinner], kind: .soup, ingredients: [.chicken, .pasta, .onion, .spud, .carrot]),
@@ -258,17 +264,18 @@ let favoritesDishes = [
   Dish(name: "картошка запечено-вареная", meals: [.dinner], kind: .main, ingredients: [.spud, .paprika]),
   Dish(name: "шаверма", meals: [.dinner], kind: .main, ingredients: [.pita, .pork, .hummus, .redCabbage, .tomato, .cucumber, .pickles]),
   Dish(name: "запечённая клунька", meals: [.dinner], kind: .main, ingredients: [.chicken]),
-  
+
   Dish(name: "салат с креветками", meals: [.supper], kind: .salad, ingredients: [.green, .shrimp, .tomato, .egg]),
-  //  Dish(name: "кустодиевский салат", meals: [.supper], kind: .salad, ingredients: [.green, .cannedBeans, .sausage, .tomato, .rusk, .mayonnaise]),
-  //  Dish(name: "пельмени", meals: [.supper], kind: .none, ingredients: [.pelmeni]),
+  Dish(name: "кустодиевский салат", meals: [.supper], kind: .salad, ingredients: [.green, .cannedBeans, .sausage, .tomato, .rusk, .mayonnaise]),
+  Dish(name: "пельмени", meals: [.supper], kind: .none, ingredients: [.pelmeni]),
   Dish(name: "гавайская смесь с яйцом", meals: [.supper], kind: .none, ingredients: [.havaiiMix, .egg]),
   Dish(name: "творог с зеленью", meals: [.supper], kind: .none, ingredients: [.cottageCheese, .cucumber, .dill]),
-  Dish(name: "стейк", meals: [.supper], kind: .none, ingredients: [.stake]),
-  Dish(name: "рыба в панировке", meals: [.supper], kind: .none, ingredients: [.salmon, .green, .rusk, .butter]),
-  Dish(name: "свинина по-индонезийски", meals: [.supper], kind: .none, ingredients: [.pork, .flour, .ginger, .onion, .lemon, .soy]),
+  Dish(name: "стейк", meals: [.supper], kind: .main, ingredients: [.stake]),
+  Dish(name: "рыба в панировке", meals: [.supper], kind: .main, ingredients: [.salmon, .green, .rusk, .butter]),
+  Dish(name: "свинина по-индонезийски", meals: [.supper], kind: .main, ingredients: [.pork, .flour, .ginger, .onion, .lemon, .soy]),
   Dish(name: "пеннони с овощами", meals: [.supper], kind: .none, ingredients: [.pasta, .squash, .sweetRedPepper, .eggplant, .garlic, .pesto]),
-  Dish(name: "гратен из цветной капусты", meals: [.supper], kind: .none, ingredients: [.cauliflower, .cheese, .milk, .butter, .dijonMustard]),
+  Dish(name: "гратен из цветной капусты", meals: [.supper], kind: .main, ingredients: [.cauliflower, .cheese, .milk, .butter, .dijonMustard]),
+  Dish(name: "лосось в пергаменте", meals: [.supper], kind: .main, ingredients: [.salmon, .spinach, .onion, .sourCream]),
 ]
 
 enum Weekday: Int, CaseIterable, CustomStringConvertible {
@@ -279,14 +286,14 @@ enum Weekday: Int, CaseIterable, CustomStringConvertible {
   case friday
   case saturday
   case sunday
-  
+
   static func day(before: Weekday) -> Weekday {
     if before == .monday { return .sunday }
     return Weekday(rawValue: before.rawValue - 1)!
   }
-  
+
   static let weekend: [Weekday] = [.saturday, .sunday]
-  
+
   var description: String {
     switch self {
     case .monday: return "Пн"
@@ -305,29 +312,36 @@ enum DaylyMenu: CustomStringConvertible {
     let breakfast: Dish
     let dinner: Dish
     let supper: Dish
-    
-    var description: String {
-      [breakfast, dinner, supper].map { " - \($0)" }.joined(separator: "\n")
+
+    var dishes: [Dish] {
+      [breakfast, dinner, supper]
     }
-    
+
+    var description: String {
+      dishes.map { " - \($0)" }.joined(separator: "\n")
+    }
+
     var ingredients: Set<Dish.Ingredient> {
-      [breakfast, dinner, supper].map { $0.ingredients }
+      dishes.map { $0.ingredients }
         .reduce([]) { $0.union($1) }
     }
-    
+
     func hasDish(of kind: Dish.Kind) -> Bool {
-      [breakfast, dinner, supper].compactMap { $0.kind }
-        .first { $0 == kind } != nil
+      dishes.contains { $0.kind == kind }
     }
   }
-  
+
   case regular(Regular)
   case free
-  
+
+  var dishes: [Dish] {
+    value?.dishes ?? []
+  }
+
   var description: String {
     value?.description ?? "Свободный день (доедаем остатки)"
   }
-  
+
   var value: Regular? {
     switch self {
     case let .regular(value):
@@ -336,11 +350,11 @@ enum DaylyMenu: CustomStringConvertible {
       return nil
     }
   }
-  
+
   var ingredients: Set<Dish.Ingredient> {
     value?.ingredients ?? []
   }
-  
+
   func hasDish(of kind: Dish.Kind) -> Bool {
     value?.hasDish(of: kind) ?? false
   }
@@ -354,7 +368,7 @@ struct WeeklyMenu: CustomStringConvertible {
   let friday: DaylyMenu
   let saturday: DaylyMenu
   let sunday: DaylyMenu
-  
+
   init?(dict: [Weekday: DaylyMenu]) {
     guard
       let monday = dict[.monday],
@@ -367,7 +381,7 @@ struct WeeklyMenu: CustomStringConvertible {
     else {
       return nil
     }
-    
+
     self.monday = monday
     self.tuesday = tuesday
     self.wednesday = wednesday
@@ -376,19 +390,29 @@ struct WeeklyMenu: CustomStringConvertible {
     self.saturday = saturday
     self.sunday = sunday
   }
-  
+
+  var menus: [DaylyMenu] {
+    [monday, tuesday, wednesday, thursday, friday, saturday, sunday]
+  }
+
+  var dishes: [Dish] {
+    menus
+      .map { $0.dishes }
+      .flatMap { $0 }
+  }
+
   var description: String {
     let ss: [[CustomStringConvertible]] = zip(
       Weekday.allCases,
-      [monday, tuesday, wednesday, thursday, friday, saturday, sunday]
+      menus
     ).map { (weekday, daylyMenu) in [weekday, daylyMenu] }
     return ss.reduce([], +)
       .map { $0.description }
       .joined(separator: "\n")
   }
-  
+
   var ingredients: Set<Dish.Ingredient> {
-    [monday, tuesday, wednesday, thursday, friday, saturday, sunday]
+    menus
       .map { $0.ingredients }
       .reduce([]) { $0.union($1) }
   }
@@ -407,7 +431,7 @@ extension WeeklyMenu {
   //  4. Не повторять каши 2 дня подряд
   //  5. Суббота или воскресенье — свободный день
   //  6. Любое блюдо, кроме супа, не должно повторяться 2 раза в неделю
-  
+
   static func make(
     dishes: [Dish],
     mondayDinner: Dish?,
@@ -416,27 +440,31 @@ extension WeeklyMenu {
     let seed = seed ?? UInt64.random(in: UInt64.min...UInt64.max)
     print("Using seed: \(seed)")
     var generator = SeededGenerator(seed: seed)
-    
+
     var menu = [Weekday: DaylyMenu]()
     let freeday = Weekday.weekend.randomElement(using: &generator)!
     let vegetarianday = Weekday.allCases
       .filter { ![Weekday.monday, freeday].contains($0) }.randomElement(using: &generator)!
-    
+
+    var usedDishes = Set<Dish>()
     try Weekday.allCases.forEach { today in
       let yesterday = Weekday.day(before: today)
       let dayBeforeYesterday = Weekday.day(before: yesterday)
       let yesterdayMenu = menu[yesterday]
       let dayBeforeYesterdayMenu = menu[dayBeforeYesterday]
-      
+
       let yesterdayWasPorrige = yesterdayMenu?.hasDish(of: .porridge) ?? false
-      let availableDishes = yesterdayWasPorrige ? dishes.notPorridge : dishes
-      
+      let notUsedDishes = dishes.not(in: usedDishes)
+      let availableDishes = yesterdayWasPorrige
+        ? notUsedDishes.notPorridge
+        : notUsedDishes
+
       let yesterdayWasSoup = yesterdayMenu?.hasDish(of: .soup) ?? false
       let dayBeforeYesterdayWasSoup = dayBeforeYesterdayMenu?.hasDish(of: .soup) ?? false
-      
+
       let yesterdaySoup = (yesterdayWasSoup && !dayBeforeYesterdayWasSoup)
         ? yesterdayMenu?.value?.dinner : nil
-      
+
       let option: DinnerOption
       if let mondayDinner = mondayDinner, today == .monday {
         option = .mondayDinner(mondayDinner)
@@ -445,16 +473,23 @@ extension WeeklyMenu {
       } else {
         option = .fromScratch
       }
-      
+
       let todayMenu: DaylyMenu
       if today == freeday {
         todayMenu = .free
       } else if today == vegetarianday {
-        todayMenu = try availableDishes.vegetarian.makeRegularMenuForADay(option, generator: &generator)
+        todayMenu = try availableDishes.vegetarian.makeRegularMenuForADay(
+          option,
+          generator: &generator
+        )
       } else {
-        todayMenu = try availableDishes.makeRegularMenuForADay(option, generator: &generator)
+        todayMenu = try availableDishes.makeRegularMenuForADay(
+          option,
+          generator: &generator
+        )
       }
       menu[today] = todayMenu
+      usedDishes = usedDishes.union(todayMenu.dishes)
     }
     return WeeklyMenu(dict: menu)!
   }
@@ -470,18 +505,17 @@ extension Array where Element == Dish {
   var vegetarian: Self { filter { $0.isVegetarian } }
   var notPorridge: Self { filter { $0.kind == nil || $0.kind != .porridge } }
   func not(in used: Set<Dish>) -> Self { filter { !used.contains($0) } }
-  
+
   func makeRegularMenuForADay(
     _ dinnerOption: DinnerOption,
     generator: inout SeededGenerator
   ) throws -> DaylyMenu {
     let onceADay: [Dish.Ingredient] = [.rice, .egg, .grecha, .salmon, .cottageCheese, .pork]
-    guard let breakfast = not(in: usedDishes)
-            .filter({ $0.meals.contains(.breakfast) })
+    let breakfasts = filter({ $0.meals.contains(.breakfast) })
+    guard let breakfast = breakfasts
             .randomElement(using: &generator) else {
       throw MenuGenerationError.notEnoughBreakfast
     }
-    usedDishes.insert(breakfast)
     let dinner: Dish
     switch dinnerOption {
     case let .yesterday(yesterday):
@@ -489,7 +523,7 @@ extension Array where Element == Dish {
     case let .mondayDinner(mondayDinner):
       dinner = mondayDinner
     case .fromScratch:
-      if let today = not(in: usedDishes)
+      if let today = not(in: [breakfast])
           .filter({ $0.meals.contains(.dinner) })
           .filter({ $0.ingredients.isDisjoint(with: breakfast.ingredients.intersection(onceADay)) })
           .randomElement(using: &generator) {
@@ -498,28 +532,35 @@ extension Array where Element == Dish {
         throw MenuGenerationError.notEnoughDinner
       }
     }
-    usedDishes.insert(dinner)
     let breakfastAndDinner = breakfast.ingredients.union(dinner.ingredients)
-    guard let supper = not(in: usedDishes)
+    guard let supper = not(in: [breakfast, dinner])
             .filter({ $0.meals.contains(.supper) })
             .filter({ $0.ingredients.isDisjoint(with: breakfastAndDinner.intersection(onceADay)) })
             .randomElement(using: &generator) else {
       throw MenuGenerationError.notEnoughSupper
     }
-    usedDishes.insert(supper)
-    
+
     return DaylyMenu.regular(.init(breakfast: breakfast, dinner: dinner, supper: supper))
   }
 }
 
-var usedDishes = Set<Dish>()
 do {
+  let bannedDishes = [
+    "грибной суп",
+    "кустодиевский салат",
+    "пельмени",
+    "гратен из цветной капусты",
+    "гороховый суп",
+    "свинина по-индонезийски",
+    "салат с креветками",
+    "запечённая клунька",
+  ].map { name in favoritesDishes.first { $0.name == name }! }
+
   let menu = try WeeklyMenu.make(
-    dishes: favoritesDishes,
+    dishes: favoritesDishes.not(in: Set(bannedDishes)),
     mondayDinner: nil,
     seed: nil
   )
-  
   print(menu)
   print("Все ингридиенты:")
   menu.ingredients.forEach { print("\($0)") }
