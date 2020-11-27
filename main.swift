@@ -18,7 +18,7 @@ struct SeededGenerator: RandomNumberGenerator {
 struct Dish: Hashable, CustomStringConvertible {
   enum Meal: Hashable { case breakfast, dinner, supper }
   enum Kind: Hashable { case soup, main, porridge, salad }
-  enum Ingredient: String, Hashable, CustomStringConvertible {
+  enum Ingredient: String, Hashable, CustomStringConvertible, Comparable {
     case spud = "картофель"
     case tomato = "помидоры"
     case chicken = "курица"
@@ -235,12 +235,70 @@ struct Dish: Hashable, CustomStringConvertible {
     var description: String {
       rawValue + (emoji ?? "")
     }
+
+    static func < (lhs: Dish.Ingredient, rhs: Dish.Ingredient) -> Bool {
+      lhs.rawValue < rhs.rawValue
+    }
+  }
+
+  enum Unit: String, Comparable, CustomStringConvertible {
+    case p = "шт"
+
+    var description: String { rawValue }
+
+    static func < (lhs: Dish.Unit, rhs: Dish.Unit) -> Bool {
+      lhs.rawValue < rhs.rawValue
+    }
+  }
+
+  struct Value: Hashable, CustomStringConvertible, Comparable {
+    let quantity: UInt
+    let unit: Unit
+
+    var description: String { "\(quantity) \(unit)" }
+
+    static func < (lhs: Dish.Value, rhs: Dish.Value) -> Bool {
+      guard lhs.unit == rhs.unit else {
+        return false
+      }
+      return lhs.unit < rhs.unit
+    }
+
+    static let one = Self(quantity: 1, unit: .p)
+  }
+
+  struct Item: Hashable, CustomStringConvertible, Comparable {
+    let ingredient: Ingredient
+    let value: Value
+
+    var description: String { "\(ingredient) (\(value))" }
+
+    static func < (lhs: Dish.Item, rhs: Dish.Item) -> Bool {
+      if lhs.ingredient < rhs.ingredient {
+        return true
+      }
+      if lhs.ingredient > rhs.ingredient  {
+        return false
+      }
+      return lhs.value < rhs.value
+    }
   }
 
   let name: String
   let meals: Set<Meal>
   let kind: Kind?
-  let ingredients: Set<Ingredient>
+  let items: Set<Item>
+
+  init(name: String, meals: Set<Dish.Meal>, kind: Dish.Kind?, ingredients: Set<Dish.Ingredient>) {
+    self.name = name
+    self.meals = meals
+    self.kind = kind
+    self.items = Set(ingredients.map { Dish.Item(ingredient: $0, value: .one) })
+  }
+
+  var ingredients: Set<Ingredient> {
+    Set(items.map { $0.ingredient })
+  }
 
   var isVegetarian: Bool {
     ingredients.filter { !$0.isVegetarian }.isEmpty
@@ -341,6 +399,10 @@ enum DaylyMenu: CustomStringConvertible {
       dishes.map { " - \($0)" }.joined(separator: "\n")
     }
 
+    var items: [Dish.Item] {
+      dishes.map { Array($0.items) }.flatMap { $0 }
+    }
+
     var ingredients: Set<Dish.Ingredient> {
       dishes.map { $0.ingredients }
         .reduce([]) { $0.union($1) }
@@ -369,6 +431,10 @@ enum DaylyMenu: CustomStringConvertible {
     case .free:
       return nil
     }
+  }
+
+  var items: [Dish.Item] {
+    value.map { Array($0.items) } ?? []
   }
 
   var ingredients: Set<Dish.Ingredient> {
@@ -429,6 +495,10 @@ struct WeeklyMenu: CustomStringConvertible {
     return ss.reduce([], +)
       .map { $0.description }
       .joined(separator: "\n")
+  }
+
+  var items: [Dish.Item] {
+    menus.map { $0.items }.flatMap({ $0 })
   }
 
   var ingredients: Set<Dish.Ingredient> {
@@ -588,9 +658,30 @@ do {
   )
   print(menu)
   print("Все ингридиенты:")
-  menu.ingredients.forEach { print("\($0)") }
+  menu.items.sorted().compacted().forEach { print("\($0)") }
 } catch {
   print("Ошибка: \(error).")
 }
 
 
+extension Array where Element == Dish.Item {
+  func compacted() -> Self {
+    var result = Self()
+    forEach { curr in
+      if let prev = result.last,
+         prev.ingredient == curr.ingredient,
+         prev.value.unit == curr.value.unit {
+        result[result.index(before: result.endIndex)] = Dish.Item(
+          ingredient: curr.ingredient,
+          value: Dish.Value(
+            quantity: prev.value.quantity + curr.value.quantity,
+            unit: curr.value.unit
+          )
+        )
+      } else {
+        result.append(curr)
+      }
+    }
+    return result
+  }
+}
