@@ -81,6 +81,11 @@ struct Dish: Hashable, CustomStringConvertible {
     case cheese = "сыр"
     case spinach = "шпинат"
     case sourCream = "сметана"
+    case millet = "пшено"
+    case mozzarella = "моцарелла"
+    case pumpkin = "тыква"
+    case cellophaneNoodles = "фунчоза"
+    case cranberry = "брусника"
 
     var isVegetarian: Bool {
       switch self {
@@ -137,6 +142,11 @@ struct Dish: Hashable, CustomStringConvertible {
            .cheese,
            .spinach,
            .sourCream,
+           .millet,
+           .mozzarella,
+           .cellophaneNoodles,
+           .cranberry,
+           .pumpkin,
            .havaiiMix:
         return true
       case .chicken,
@@ -212,6 +222,11 @@ struct Dish: Hashable, CustomStringConvertible {
            .dijonMustard,
            .spinach,
            .sourCream,
+           .millet,
+           .mozzarella,
+           .cellophaneNoodles,
+           .cranberry,
+           .pumpkin,
            .havaiiMix:
         return nil
       }
@@ -240,11 +255,13 @@ struct Dish: Hashable, CustomStringConvertible {
 let favoritesDishes = [
   Dish(name: "рисовая каша", meals: [.breakfast], kind: .porridge, ingredients: [.rice, .coconutMilk]),
   Dish(name: "гречневая каша", meals: [.breakfast], kind: .porridge, ingredients: [.grecha, .coconutMilk]),
+  Dish(name: "пшенная каша", meals: [.breakfast], kind: .porridge, ingredients: [.millet, .coconutMilk]),
   Dish(name: "сырники", meals: [.breakfast], kind: .none, ingredients: [.cottageCheese, .egg, .flour]),
   Dish(name: "гранола", meals: [.breakfast], kind: .none, ingredients: [.oatmeal, .nuts]),
   Dish(name: "английский завтрак", meals: [.breakfast], kind: .none, ingredients: [.egg, .bacon, .cannedBeans, .tomato]),
   Dish(name: "авокадо тост", meals: [.breakfast], kind: .none, ingredients: [.avocado, .egg, .bread, .salmon, .creamcheese]),
   Dish(name: "оладушки", meals: [.breakfast], kind: .none, ingredients: [.kefir, .flour, .vinegar]),
+  Dish(name: "капрезе с соусом песто", meals: [.breakfast], kind: .none, ingredients: [.mozzarella, .lemon, .garlic, .green, .pesto]),
 
   Dish(name: "грибной суп", meals: [.dinner], kind: .soup, ingredients: [.milk, .mushrooms, .onion, .spud, .carrot]),
   Dish(name: "гороховый суп", meals: [.dinner], kind: .soup, ingredients: [.peas, .smockedRibs, .onion, .spud, .carrot]),
@@ -276,6 +293,9 @@ let favoritesDishes = [
   Dish(name: "пеннони с овощами", meals: [.supper], kind: .none, ingredients: [.pasta, .squash, .sweetRedPepper, .eggplant, .garlic, .pesto]),
   Dish(name: "гратен из цветной капусты", meals: [.supper], kind: .main, ingredients: [.cauliflower, .cheese, .milk, .butter, .dijonMustard]),
   Dish(name: "лосось в пергаменте", meals: [.supper], kind: .main, ingredients: [.salmon, .spinach, .onion, .sourCream]),
+  Dish(name: "оладьи из цукини", meals: [.supper], kind: .main, ingredients: [.squash, .pumpkin, .sweetRedPepper, .green, .flour]),
+  Dish(name: "фунчоза с овщами", meals: [.supper], kind: .main, ingredients: [.carrot, .sweetRedPepper, .garlic, .soy, .green, .cucumber]),
+  Dish(name: "куриные котлеты", meals: [.supper], kind: .main, ingredients: [.chicken, .squash, .garlic, .dill, .green, .celery, .cranberry]),
 ]
 
 enum Weekday: Int, CaseIterable, CustomStringConvertible {
@@ -554,6 +574,11 @@ do {
     "свинина по-индонезийски",
     "салат с креветками",
     "запечённая клунька",
+    "шаверма",
+    "суп из индейки",
+    "мясо запечённое",
+    "мясо по-французски",
+    "картошка запечено-вареная",
   ].map { name in favoritesDishes.first { $0.name == name }! }
 
   let menu = try WeeklyMenu.make(
