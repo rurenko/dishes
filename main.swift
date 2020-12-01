@@ -15,10 +15,10 @@ struct SeededGenerator: RandomNumberGenerator {
   }
 }
 
-struct Dish: Hashable, CustomStringConvertible {
-  enum Meal: Hashable { case breakfast, dinner, supper }
-  enum Kind: Hashable { case soup, main, porridge, salad }
-  enum Ingredient: String, Hashable, CustomStringConvertible, Comparable {
+struct Dish: Hashable, CustomStringConvertible, Codable {
+  enum Meal: String, Hashable, Codable { case breakfast, dinner, supper }
+  enum Kind: String, Hashable, Codable { case soup, main, porridge, salad }
+  enum Ingredient: String, Hashable, CustomStringConvertible, Comparable, Codable {
     case spud = "картофель"
     case tomato = "помидоры"
     case chicken = "курица"
@@ -241,7 +241,7 @@ struct Dish: Hashable, CustomStringConvertible {
     }
   }
 
-  enum Unit: String, Comparable, CustomStringConvertible {
+  enum Unit: String, Comparable, CustomStringConvertible, Codable {
     case p = "шт"
 
     var description: String { rawValue }
@@ -251,8 +251,8 @@ struct Dish: Hashable, CustomStringConvertible {
     }
   }
 
-  struct Value: Hashable, CustomStringConvertible, Comparable {
-    let quantity: UInt
+  struct Value: Hashable, CustomStringConvertible, Comparable, Codable {
+    let quantity: Double
     let unit: Unit
 
     var description: String { "\(quantity) \(unit)" }
@@ -267,7 +267,7 @@ struct Dish: Hashable, CustomStringConvertible {
     static let one = Self(quantity: 1, unit: .p)
   }
 
-  struct Item: Hashable, CustomStringConvertible, Comparable {
+  struct Item: Hashable, CustomStringConvertible, Comparable, Codable {
     let ingredient: Ingredient
     let value: Value
 
@@ -285,15 +285,15 @@ struct Dish: Hashable, CustomStringConvertible {
   }
 
   let name: String
-  let meals: Set<Meal>
+  let meals: [Meal]
   let kind: Kind?
-  let items: Set<Item>
+  let items: [Item]
 
-  init(name: String, meals: Set<Dish.Meal>, kind: Dish.Kind?, ingredients: Set<Dish.Ingredient>) {
+  init(name: String, meals: [Dish.Meal], kind: Dish.Kind?, ingredients: [Dish.Ingredient]) {
     self.name = name
     self.meals = meals
     self.kind = kind
-    self.items = Set(ingredients.map { Dish.Item(ingredient: $0, value: .one) })
+    self.items = ingredients.map { Dish.Item(ingredient: $0, value: .one) }
   }
 
   var ingredients: Set<Ingredient> {
@@ -662,7 +662,6 @@ do {
 } catch {
   print("Ошибка: \(error).")
 }
-
 
 extension Array where Element == Dish.Item {
   func compacted() -> Self {
