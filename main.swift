@@ -1,5 +1,12 @@
 import GameplayKit
 
+struct Enviroment {
+  let maxSoupCountPerWeek: Int
+  static let live = Self(maxSoupCountPerWeek: 2)
+}
+
+var Current: Enviroment = .live
+
 struct SeededGenerator: RandomNumberGenerator {
   let seed: UInt64
   private let generator: GKMersenneTwisterRandomSource
@@ -310,6 +317,11 @@ struct Dish: Hashable, CustomStringConvertible, Codable {
   }
 }
 
+extension Dish {
+  var isSoup: Bool { kind == .soup }
+  var isPorridge: Bool { kind == .porridge }
+}
+
 let favoritesDishes = [
   Dish(name: "рисовая каша", meals: [.breakfast], kind: .porridge, ingredients: [.rice, .coconutMilk]),
   Dish(name: "гречневая каша", meals: [.breakfast], kind: .porridge, ingredients: [.grecha, .coconutMilk]),
@@ -543,11 +555,13 @@ extension WeeklyMenu {
       let yesterdayMenu = menu[yesterday]
       let dayBeforeYesterdayMenu = menu[dayBeforeYesterday]
 
-      let yesterdayWasPorrige = yesterdayMenu?.hasDish(of: .porridge) ?? false
+      let yesterdayWasPorridge = yesterdayMenu?.hasDish(of: .porridge) ?? false
       let notUsedDishes = dishes.not(in: usedDishes)
-      let availableDishes = yesterdayWasPorrige
-        ? notUsedDishes.notPorridge
-        : notUsedDishes
+      let currenSoupCount = menu.values.map { $0.dishes }.flatMap { $0 }.filter { $0.isSoup }.count
+      let isSoupAvailable = currenSoupCount < Current.maxSoupCountPerWeek
+      let availableDishes = notUsedDishes
+        .filter { isSoupAvailable || !$0.isSoup }
+        .filter { yesterdayWasPorridge ? !$0.isPorridge : true }
 
       let yesterdayWasSoup = yesterdayMenu?.hasDish(of: .soup) ?? false
       let dayBeforeYesterdayWasSoup = dayBeforeYesterdayMenu?.hasDish(of: .soup) ?? false
@@ -593,7 +607,6 @@ enum DinnerOption {
 
 extension Array where Element == Dish {
   var vegetarian: Self { filter { $0.isVegetarian } }
-  var notPorridge: Self { filter { $0.kind == nil || $0.kind != .porridge } }
   func not(in used: Set<Dish>) -> Self { filter { !used.contains($0) } }
 
   func makeRegularMenuForADay(
@@ -636,19 +649,14 @@ extension Array where Element == Dish {
 
 do {
   let bannedDishes = [
-    "грибной суп",
     "кустодиевский салат",
     "пельмени",
     "гратен из цветной капусты",
-    "гороховый суп",
-    "свинина по-индонезийски",
     "салат с креветками",
     "запечённая клунька",
-    "шаверма",
-    "суп из индейки",
     "мясо запечённое",
     "мясо по-французски",
-    "картошка запечено-вареная",
+    "оладьи из цукини",
   ].map { name in favoritesDishes.first { $0.name == name }! }
 
   let menu = try WeeklyMenu.make(
